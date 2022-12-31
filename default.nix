@@ -9,15 +9,16 @@
       foo = "hi";
       bar = "there";
     };
-  } ).config.dumpSpecial;
+  } ).config.dumpSpecial + "\n";
 in derivation {
   inherit system text;
   name       = "dump-text";
   builder    = "${pkgsFor.bash}/bin/bash";
   passAsFile = ["text"];
-  PATH       = "${pkgsFor.coreutils}/bin";
   args       = ["-eu" "-o" "pipefail" "-c" ''
-    cat "$textPath" > "$out";
+    while IFS= read -r line; do
+      printf '%s\n' "$line" >> "$out";
+    done <"$textPath"
   ''];
   preferLocalBuild = true;
   allowSubstitutes = ( builtins.currentSystem or "unknown" ) != system;
